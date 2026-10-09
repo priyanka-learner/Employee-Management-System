@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management System</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            color: #333;
+        }
+
+        header {
+            background: #243b55;
+            color: white;
+            text-align: center;
+            padding: 25px 15px;
+        }
+
+        header h1 {
+            margin-bottom: 8px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            color: #243b55;
+            margin-bottom: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+
+        input:focus,
+        select:focus {
+            outline: 2px solid #9ac7ef;
+            border-color: #1769aa;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            opacity: 0.85;
+        }
+
+        .primary-btn {
+            background: #1769aa;
+            color: white;
+        }
+
+        .cancel-btn {
+            background: #6c757d;
+            color: white;
+        }
+
+        .edit-btn {
+            background: #198754;
+            color: white;
+            margin-right: 5px;
+            margin-bottom: 4px;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            margin-bottom: 4px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .toolbar {
+            display: grid;
+            grid-template-columns: minmax(200px, 1fr) 180px 180px;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 850px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        th {
+            background: #243b55;
+            color: white;
+        }
+
+        tbody tr:hover {
+            background: #f4f8fc;
+        }
+
+        .message {
+            display: none;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+
+        .message.success {
+            display: block;
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .message.error {
+            display: block;
+            background: #f8d7da;
+            color: #842029;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 25px;
+            color: #777;
+        }
+
+        footer {
+            background: #243b55;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 700px) {
+            .container {
+                padding: 0 12px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .toolbar {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 18px;
+            }
+
+            header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Employee Management System</h1>
+        <p>Manage employee records easily and efficiently</p>
+    </header>
+
+    <main class="container">
+
+        <!-- Employee Form -->
+        <section class="card">
+
+            <h2 id="formTitle">Add New Employee</h2>
+
+            <div id="formMessage" class="message" role="status"
+                aria-live="polite"></div>
+
+            <form id="employeeForm">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="name">Employee Name</label>
+                        <input
+                            type="text"
+                            id="name"
+                            maxlength="100"
+                            placeholder="Enter employee name"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="department">Department</label>
+                        <input
+                            type="text"
+                            id="department"
+                            maxlength="100"
+                            placeholder="Enter department"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="role">Job Role</label>
+                        <input
+                            type="text"
+                            id="role"
+                            maxlength="100"
+                            placeholder="Enter job role"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="salary">Salary</label>
+                        <input
+                            type="number"
+                            id="salary"
+                            min="0"
+                            max="99999999.99"
+                            step="0.01"
+                            placeholder="Enter salary"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="join_date">Joining Date</label>
+                        <input
+                            type="date"
+                            id="join_date"
+                            required>
+                    </div>
+
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" id="submitBtn" class="primary-btn">
+                        Add Employee
+                    </button>
+
+                    <button type="button" id="cancelBtn" class="cancel-btn"
+                        hidden>
+                        Cancel Edit
+                    </button>
+                </div>
+
+            </form>
+        </section>
+
+        <!-- Employee Records -->
+        <section class="card">
+
+            <h2>Employee Records</h2>
+
+            <div id="tableMessage" class="message" role="status"
+                aria-live="polite"></div>
+
+            <div class="toolbar">
+
+                <input
+                    type="search"
+                    id="search"
+                    placeholder="Search by name, department or role..."
+                    aria-label="Search employees">
+
+                <select id="sortBy" aria-label="Sort employees by">
+                    <option value="">Default Order</option>
+                    <option value="name">Name</option>
+                    <option value="department">Department</option>
+                    <option value="role">Job Role</option>
+                    <option value="salary">Salary</option>
+                    <option value="join_date">Joining Date</option>
+                </select>
+
+                <select id="sortOrder" aria-label="Sort order">
+                    <option value="asc">Ascending ↑</option>
+                    <option value="desc">Descending ↓</option>
+                </select>
+
+            </div>
+
+            <div class="table-wrapper">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Department</th>
+                            <th>Role</th>
+                            <th>Salary</th>
+                            <th>Joining Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="employeeList">
+                        <tr>
+                            <td colspan="7" class="empty-message">
+                                Loading employees...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer>
+        <p>Employee Management System | Full Stack Development Project</p>
+    </footer>
+
+    <script>
+        const API = "/api/employees";
+
+        const form = document.getElementById("employeeForm");
+        const list = document.getElementById("employeeList");
+        const submitBtn = document.getElementById("submitBtn");
+        const cancelBtn = document.getElementById("cancelBtn");
+        const formTitle = document.getElementById("formTitle");
+
+        let employees = [];
+        let editingId = null;
+        let loading = false;
+
+        // Display messages
+        function showMessage(elementId, message, type) {
+            const element = document.getElementById(elementId);
+
+            element.textContent = message;
+            element.className = "message " + type;
+        }
+
+        function clearMessage(elementId) {
+            const element = document.getElementById(elementId);
+
+            element.textContent = "";
+            element.className = "message";
+        }
+
+        // Format date for the date input
+        function formatDateForInput(dateValue) {
+            if (!dateValue) {
+                return "";
+            }
+
+            if (typeof dateValue === "string") {
+                const match = dateValue.match(/^(\d{4}-\d{2}-\d{2})/);
+
+                if (match) {
+                    return match[1];
+                }
+            }
+
+            const date = new Date(dateValue);
+
+            if (Number.isNaN(date.getTime())) {
+                return "";
+            }
+
+            return [
+                date.getFullYear(),
+                String(date.getMonth() + 1).padStart(2, "0"),
+                String(date.getDate()).padStart(2, "0")
+            ].join("-");
+        }
+
+        // Load employees from backend
+        async function loadEmployees() {
+            loading = true;
+            list.innerHTML = `
+                <tr>
+                    <td colspan="7" class="empty-message">
+                        Loading employees...
+                    </td>
+                </tr>
+            `;
+
+            clearMessage("tableMessage");
+
+            try {
+                const response = await fetch(API);
+
+                if (!response.ok) {
+                    throw new Error("Unable to load employee records.");
+                }
+
+                employees = await response.json();
+
+                if (!Array.isArray(employees)) {
+                    throw new Error("Invalid response received from server.");
+                }
+
+                renderEmployees();
+
+            } catch (error) {
+                list.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-message">
+                            Could not load employees. Please check the server.
+                        </td>
+                    </tr>
+                `;
+
+                showMessage("tableMessage", error.message, "error");
+
+            } finally {
+                loading = false;
+            }
+        }
+
+        // Search and sort employees
+        function renderEmployees() {
+            const search = document.getElementById("search")
+                .value.trim().toLowerCase();
+
+            const sortBy = document.getElementById("sortBy").value;
+            const sortOrder = document.getElementById("sortOrder").value;
+
+            list.innerHTML = "";
+
+            let filteredEmployees = employees.filter(employee => {
+                return [
+                    employee.name,
+                    employee.department,
+                    employee.role
+                ].some(value =>
+                    String(value ?? "").toLowerCase().includes(search)
+                );
+            });
+
+            if (sortBy) {
+                filteredEmployees.sort((a, b) => {
+                    let result;
+
+                    if (sortBy === "salary") {
+                        result = Number(a.salary) - Number(b.salary);
+                    } else if (sortBy === "join_date") {
+                        result = String(a.join_date ?? "")
+                            .localeCompare(String(b.join_date ?? ""));
+                    } else {
+                        result = String(a[sortBy] ?? "")
+                            .localeCompare(String(b[sortBy] ?? ""), undefined, {
+                                sensitivity: "base"
+                            });
+                    }
+
+                    return sortOrder === "desc" ? -result : result;
+                });
+            }
+
+            if (filteredEmployees.length === 0) {
+                const row = document.createElement("tr");
+                const cell = document.createElement("td");
+
+                cell.colSpan = 7;
+                cell.className = "empty-message";
+                cell.textContent = search
+                    ? "No employees match your search."
+                    : "No employees found. Add an employee to get started.";
+
+                row.appendChild(cell);
+                list.appendChild(row);
+                return;
+            }
+
+            filteredEmployees.forEach(employee => {
+                const row = document.createElement("tr");
+
+                const values = [
+                    employee.id,
+                    employee.name,
+                    employee.department,
+                    employee.role,
+                    employee.salary,
+                    formatDateForInput(employee.join_date)
+                ];
+
+                values.forEach(value => {
+                    const cell = document.createElement("td");
+                    cell.textContent = value ?? "";
+                    row.appendChild(cell);
+                });
+
+                const actions = document.createElement("td");
+
+                const editButton = document.createElement("button");
+                editButton.textContent = "Edit";
+                editButton.className = "edit-btn";
+                editButton.type = "button";
+                editButton.onclick = () => editEmployee(employee);
+
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "Delete";
+                deleteButton.className = "delete-btn";
+                deleteButton.type = "button";
+                deleteButton.onclick = () => deleteEmployee(employee.id);
+
+                actions.append(editButton, deleteButton);
+                row.appendChild(actions);
+
+                list.appendChild(row);
+            });
+        }
+
+        // Add or update employee
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            clearMessage("formMessage");
+
+            if (loading) {
+                return;
+            }
+
+            const name = document.getElementById("name").value.trim();
+            const department = document.getElementById("department").value.trim();
+            const role = document.getElementById("role").value.trim();
+            const salaryValue = document.getElementById("salary").value;
+            const join_date = document.getElementById("join_date").value;
+
+            const salary = Number(salaryValue);
+
+            if (!name || !department || !role || !salaryValue || !join_date) {
+                showMessage(
+                    "formMessage",
+                    "Please fill in all required fields.",
+                    "error"
+                );
+                return;
+            }
+
+            if (
+                !Number.isFinite(salary) ||
+                salary < 0 ||
+                salary > 99999999.99
+            ) {
+                showMessage(
+                    "formMessage",
+                    "Please enter a valid salary.",
+                    "error"
+                );
+                return;
+            }
+
+            const employeeData = {
+                name,
+                department,
+                role,
+                salary,
+                join_date
+            };
+
+            const url = editingId === null
+                ? API
+                : `${API}/${editingId}`;
+
+            const method = editingId === null ? "POST" : "PUT";
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = editingId === null
+                ? "Adding..."
+                : "Updating...";
+
+            try {
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(employeeData)
+                });
+
+                const result = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    throw new Error(
+                        result.message || result.error ||
+                        "Unable to save employee."
+                    );
+                }
+
+                const wasEditing = editingId !== null;
+
+                resetForm();
+                await loadEmployees();
+
+                showMessage(
+                    "formMessage",
+                    wasEditing
+                        ? "Employee updated successfully!"
+                        : "Employee added successfully!",
+                    "success"
+                );
+
+            } catch (error) {
+                showMessage("formMessage", error.message, "error");
+
+            } finally {
+                submitBtn.disabled = false;
+
+                if (editingId === null) {
+                    submitBtn.textContent = "Add Employee";
+                } else {
+                    submitBtn.textContent = "Update Employee";
+                }
+            }
+        });
+
+        // Fill the form with existing employee data
+        function editEmployee(employee) {
+            clearMessage("formMessage");
+
+            editingId = employee.id;
+
+            document.getElementById("name").value = employee.name ?? "";
+            document.getElementById("department").value =
+                employee.department ?? "";
+            document.getElementById("role").value = employee.role ?? "";
+            document.getElementById("salary").value = employee.salary ?? "";
+            document.getElementById("join_date").value =
+                formatDateForInput(employee.join_date);
+
+            formTitle.textContent = "Update Employee";
+            submitBtn.textContent = "Update Employee";
+            cancelBtn.hidden = false;
+
+            form.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }
+
+        // Reset form
+        function resetForm() {
+            form.reset();
+
+            editingId = null;
+
+            formTitle.textContent = "Add New Employee";
+            submitBtn.textContent = "Add Employee";
+            cancelBtn.hidden = true;
+
+            clearMessage("formMessage");
+        }
+
+        // Cancel editing
+        cancelBtn.addEventListener("click", resetForm);
+
+        // Delete employee with confirmation
+        async function deleteEmployee(id) {
+            const confirmed = confirm(
+                "Are you sure you want to delete this employee?"
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            clearMessage("tableMessage");
+
+            try {
+                const response = await fetch(`${API}/${id}`, {
+                    method: "DELETE"
+                });
+
+                const result = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    throw new Error(
+                        result.message || result.error ||
+                        "Unable to delete employee."
+                    );
+                }
+
+                if (String(editingId) === String(id)) {
+                    resetForm();
+                }
+
+                await loadEmployees();
+
+                showMessage(
+                    "tableMessage",
+                    "Employee deleted successfully!",
+                    "success"
+                );
+
+            } catch (error) {
+                showMessage("tableMessage", error.message, "error");
+            }
+        }
+
+        // Search as the user types
+        document.getElementById("search")
+            .addEventListener("input", renderEmployees);
+
+        // Sort when dropdown changes
+        document.getElementById("sortBy")
+            .addEventListener("change", renderEmployees);
+
+        document.getElementById("sortOrder")
+            .addEventListener("change", renderEmployees);
+
+        // Start the application
+        loadEmployees();
+    </script>
+
+</body>
+
+</html>

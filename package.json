@@ -1,0 +1,22 @@
+{
+  "name": "employee-management-system",
+  "version": "1.0.0",
+  "description": "> Week 2 — Task 2 | Full-Stack CRUD Application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.6",
+    "express": "^5.2.1",
+    "mysql2": "^3.24.5"
+  },
+  "overrides": {
+    "braces": "^3.0.3"
+  }
+}

@@ -1,0 +1,299 @@
+{
+  "info": {
+    "_postman_id": "ems-collection-2024",
+    "name": "Employee Management API",
+    "description": "Complete REST API collection for the Employee Management System. Base URL: http://localhost:5000\n\nEndpoints:\n- POST   /api/employees       → Create employee\n- GET    /api/employees       → List all (supports ?search=&sortBy=&order=)\n- GET    /api/employees/:id   → Get one employee\n- PUT    /api/employees/:id   → Update employee\n- DELETE /api/employees/:id   → Delete employee",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "employeeId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "health"]
+        },
+        "description": "Verify the API server is running."
+      },
+      "response": []
+    },
+    {
+      "name": "1. Create Employee (POST)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 201 Created', () => {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "pm.test('Response has employee data', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.success).to.be.true;",
+              "  pm.expect(json.data).to.have.property('id');",
+              "  // Save new employee ID for later requests",
+              "  pm.collectionVariables.set('employeeId', json.data.id);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Jane Smith\",\n  \"department\": \"Engineering\",\n  \"role\": \"Full Stack Developer\",\n  \"salary\": 92000,\n  \"join_date\": \"2024-01-15\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/employees",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "employees"]
+        },
+        "description": "Create a new employee record. All fields are required.\n\nValidation rules:\n- name: required, max 150 chars\n- department: required, max 100 chars\n- role: required, max 100 chars\n- salary: required, non-negative number\n- join_date: required, YYYY-MM-DD format"
+      },
+      "response": [
+        {
+          "name": "201 Created — Success",
+          "originalRequest": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Smith\",\n  \"department\": \"Engineering\",\n  \"role\": \"Full Stack Developer\",\n  \"salary\": 92000,\n  \"join_date\": \"2024-01-15\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/employees" }
+          },
+          "status": "Created",
+          "code": 201,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"success\": true,\n  \"message\": \"Employee created successfully.\",\n  \"data\": {\n    \"id\": 9,\n    \"name\": \"Jane Smith\",\n    \"department\": \"Engineering\",\n    \"role\": \"Full Stack Developer\",\n    \"salary\": 92000,\n    \"join_date\": \"2024-01-15T00:00:00.000Z\",\n    \"created_at\": \"2024-10-07T12:00:00.000Z\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "2. Get All Employees (GET)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200 OK', () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Returns array of employees', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.success).to.be.true;",
+              "  pm.expect(json.data).to.be.an('array');",
+              "  pm.expect(json).to.have.property('count');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/employees",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "employees"]
+        },
+        "description": "Retrieve all employees. Supports optional query parameters:\n- search: filter by name, department, or role (e.g. ?search=engineer)\n- sortBy: column to sort by — id, name, department, role, salary, join_date (default: id)\n- order: ASC or DESC (default: ASC)"
+      },
+      "response": []
+    },
+    {
+      "name": "2a. Get Employees — Search",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/employees?search=engineering",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "employees"],
+          "query": [{ "key": "search", "value": "engineering" }]
+        },
+        "description": "Search employees. The search term is matched against name, department, and role columns."
+      },
+      "response": []
+    },
+    {
+      "name": "2b. Get Employees — Sort by Salary DESC",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/employees?sortBy=salary&order=DESC",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "employees"],
+          "query": [
+            { "key": "sortBy", "value": "salary" },
+            { "key": "order",  "value": "DESC" }
+          ]
+        },
+        "description": "Retrieve all employees sorted by salary in descending order."
+      },
+      "response": []
+    },
+    {
+      "name": "3. Get Employee by ID (GET)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200 OK', () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Returns single employee', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.success).to.be.true;",
+              "  pm.expect(json.data).to.have.property('id');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/employees/{{employeeId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "employees", "{{employeeId}}"]
+        },
+        "description": "Retrieve a single employee by their ID.\n\nError cases:\n- 400: Invalid (non-numeric) ID\n- 404: Employee not found"
+      },
+      "response": [
+        {
+          "name": "404 Not Found",
+          "originalRequest": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/employees/9999" }
+          },
+          "status": "Not Found",
+          "code": 404,
+          "_postman_previewlanguage": "json",
+          "body": "{\n  \"success\": false,\n  \"message\": \"Employee with ID 9999 not found.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "4. Update Employee (PUT)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200 OK', () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Employee updated', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.success).to.be.true;",
+              "  pm.expect(json.message).to.include('updated');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Jane Smith\",\n  \"department\": \"Engineering\",\n  \"role\": \"Lead Full Stack Developer\",\n  \"salary\": 105000,\n  \"join_date\": \"2024-01-15\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/employees/{{employeeId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "employees", "{{employeeId}}"]
+        },
+        "description": "Update all fields of an existing employee. All fields must be provided (full update).\n\nError cases:\n- 400: Invalid ID\n- 404: Employee not found\n- 422: Validation error"
+      },
+      "response": [
+        {
+          "name": "422 Validation Error",
+          "originalRequest": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"department\": \"Engineering\",\n  \"role\": \"Developer\",\n  \"salary\": -500,\n  \"join_date\": \"not-a-date\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/employees/1" }
+          },
+          "status": "Unprocessable Entity",
+          "code": 422,
+          "_postman_previewlanguage": "json",
+          "body": "{\n  \"success\": false,\n  \"message\": \"Validation failed.\",\n  \"errors\": [\n    \"Name is required.\",\n    \"Salary must be a valid non-negative number.\",\n    \"Join date must be a valid date in YYYY-MM-DD format.\"\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "5. Delete Employee (DELETE)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200 OK', () => {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Employee deleted', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.success).to.be.true;",
+              "  pm.expect(json.message).to.include('deleted');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/employees/{{employeeId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "employees", "{{employeeId}}"]
+        },
+        "description": "Permanently delete an employee record.\n\nError cases:\n- 400: Invalid ID\n- 404: Employee not found"
+      },
+      "response": [
+        {
+          "name": "200 Deleted — Success",
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "body": "{\n  \"success\": true,\n  \"message\": \"Employee \\\"Jane Smith\\\" deleted successfully.\"\n}"
+        }
+      ]
+    }
+  ]
+}

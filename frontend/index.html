@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Employee Management System</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  Header                                                 -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <header class="header">
+    <div class="header__inner">
+      <div class="header__brand">
+        <span class="header__icon" aria-hidden="true">👥</span>
+        <div>
+          <h1 class="header__title">Employee Management System</h1>
+          <p class="header__subtitle">HR Administration Dashboard</p>
+        </div>
+      </div>
+      <div class="header__meta" id="headerMeta">
+        <!-- employee count injected by JS -->
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  Main                                                   -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <main class="main">
+
+    <!-- Toast notifications -->
+    <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+
+    <!-- ── Add Employee Card ─────────────────────────────── -->
+    <section class="card" aria-labelledby="addFormHeading">
+      <div class="card__header">
+        <h2 class="card__title" id="addFormHeading">
+          <span aria-hidden="true">➕</span> Add New Employee
+        </h2>
+        <button class="btn btn--ghost btn--sm" id="toggleFormBtn" aria-expanded="true" aria-controls="addEmployeeForm">
+          Collapse
+        </button>
+      </div>
+
+      <form id="addEmployeeForm" class="form" novalidate>
+        <div class="form__grid">
+
+          <div class="form__group">
+            <label for="name" class="form__label">Full Name <span class="required" aria-hidden="true">*</span></label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              class="form__input"
+              placeholder="e.g. Jane Smith"
+              autocomplete="name"
+              maxlength="150"
+              aria-required="true"
+            />
+            <span class="form__error" id="nameError" role="alert"></span>
+          </div>
+
+          <div class="form__group">
+            <label for="department" class="form__label">Department <span class="required" aria-hidden="true">*</span></label>
+            <input
+              type="text"
+              id="department"
+              name="department"
+              class="form__input"
+              placeholder="e.g. Engineering"
+              maxlength="100"
+              aria-required="true"
+            />
+            <span class="form__error" id="departmentError" role="alert"></span>
+          </div>
+
+          <div class="form__group">
+            <label for="role" class="form__label">Role <span class="required" aria-hidden="true">*</span></label>
+            <input
+              type="text"
+              id="role"
+              name="role"
+              class="form__input"
+              placeholder="e.g. Software Engineer"
+              maxlength="100"
+              aria-required="true"
+            />
+            <span class="form__error" id="roleError" role="alert"></span>
+          </div>
+
+          <div class="form__group">
+            <label for="salary" class="form__label">Salary (INR) <span class="required" aria-hidden="true">*</span></label>
+            <input
+              type="number"
+              id="salary"
+              name="salary"
+              class="form__input"
+              placeholder="e.g. 75000"
+              min="0"
+              step="0.01"
+              aria-required="true"
+            />
+            <span class="form__error" id="salaryError" role="alert"></span>
+          </div>
+
+          <div class="form__group">
+            <label for="joinDate" class="form__label">Join Date <span class="required" aria-hidden="true">*</span></label>
+            <input
+              type="date"
+              id="joinDate"
+              name="joinDate"
+              class="form__input"
+              aria-required="true"
+            />
+            <span class="form__error" id="joinDateError" role="alert"></span>
+          </div>
+
+        </div><!-- /.form__grid -->
+
+        <div class="form__actions">
+          <button type="submit" class="btn btn--primary" id="addBtn">
+            <span class="btn__icon" aria-hidden="true">➕</span> Add Employee
+          </button>
+          <button type="button" class="btn btn--secondary" id="clearBtn">
+            <span class="btn__icon" aria-hidden="true">🔄</span> Clear Form
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ── Search & Sort Controls ────────────────────────── -->
+    <section class="card controls-card" aria-label="Search and sort controls">
+      <div class="controls">
+        <div class="controls__search">
+          <label for="searchInput" class="sr-only">Search employees</label>
+          <span class="search__icon" aria-hidden="true">🔍</span>
+          <input
+            type="search"
+            id="searchInput"
+            class="form__input search__input"
+            placeholder="Search by name, department, or role…"
+            aria-label="Search employees by name, department or role"
+          />
+        </div>
+
+        <div class="controls__sort">
+          <label for="sortBy" class="controls__label">Sort by:</label>
+          <select id="sortBy" class="form__input form__input--select" aria-label="Sort by column">
+            <option value="id">ID</option>
+            <option value="name">Name</option>
+            <option value="department">Department</option>
+            <option value="role">Role</option>
+            <option value="salary">Salary</option>
+            <option value="join_date">Join Date</option>
+          </select>
+
+          <button class="btn btn--ghost btn--sm sort-dir-btn" id="sortDirBtn" aria-label="Toggle sort direction" title="Toggle sort direction">
+            <span id="sortDirIcon">↑ ASC</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Employee Table Card ───────────────────────────── -->
+    <section class="card" aria-labelledby="tableHeading">
+      <div class="card__header">
+        <h2 class="card__title" id="tableHeading">
+          <span aria-hidden="true">📋</span> Employee Records
+        </h2>
+        <span class="badge" id="recordCount">0 records</span>
+      </div>
+
+      <!-- Loading spinner -->
+      <div class="loader" id="loader" role="status" aria-label="Loading employees">
+        <div class="loader__spinner"></div>
+        <span>Loading employees…</span>
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty-state" id="emptyState" hidden>
+        <span class="empty-state__icon" aria-hidden="true">🗂️</span>
+        <p class="empty-state__text">No employees found.</p>
+        <p class="empty-state__sub">Add a new employee above or try a different search.</p>
+      </div>
+
+      <!-- Table wrapper (scrollable on mobile) -->
+      <div class="table-wrapper" id="tableWrapper" hidden>
+        <table class="table" id="employeeTable" aria-label="Employee records">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Name</th>
+              <th scope="col">Department</th>
+              <th scope="col">Role</th>
+              <th scope="col">Salary</th>
+              <th scope="col">Join Date</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  Edit Modal                                             -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="editModalOverlay" role="dialog" aria-modal="true" aria-labelledby="editModalTitle" hidden>
+    <div class="modal">
+      <div class="modal__header">
+        <h2 class="modal__title" id="editModalTitle">✏️ Edit Employee</h2>
+        <button class="modal__close" id="editModalClose" aria-label="Close edit modal">✕</button>
+      </div>
+
+      <form id="editEmployeeForm" class="form" novalidate>
+        <input type="hidden" id="editId" />
+
+        <div class="form__grid">
+          <div class="form__group">
+            <label for="editName" class="form__label">Full Name <span class="required" aria-hidden="true">*</span></label>
+            <input type="text" id="editName" class="form__input" maxlength="150" aria-required="true" />
+            <span class="form__error" id="editNameError" role="alert"></span>
+          </div>
+
+          <div class="form__group">
+            <label for="editDepartment" class="form__label">Department <span class="required" aria-hidden="true">*</span></label>
+            <input type="text" id="editDepartment" class="form__input" maxlength="100" aria-required="true" />
+            <span class="form__error" id="editDepartmentError" role="alert"></span>
+          </div>
+
+          <div class="form__group">
+            <label for="editRole" class="form__label">Role <span class="required" aria-hidden="true">*</span></label>
+            <input type="text" id="editRole" class="form__input" maxlength="100" aria-required="true" />
+            <span class="form__error" id="editRoleError" role="alert"></span>
+          </div>
+
+          <div class="form__group">
+            <label for="editSalary" class="form__label">Salary (INR) <span class="required" aria-hidden="true">*</span></label>
+            <input type="number" id="editSalary" class="form__input" min="0" step="0.01" aria-required="true" />
+            <span class="form__error" id="editSalaryError" role="alert"></span>
+          </div>
+
+          <div class="form__group">
+            <label for="editJoinDate" class="form__label">Join Date <span class="required" aria-hidden="true">*</span></label>
+            <input type="date" id="editJoinDate" class="form__input" aria-required="true" />
+            <span class="form__error" id="editJoinDateError" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="form__actions">
+          <button type="submit" class="btn btn--primary" id="saveEditBtn">
+            <span class="btn__icon" aria-hidden="true">💾</span> Save Changes
+          </button>
+          <button type="button" class="btn btn--secondary" id="cancelEditBtn">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  Delete Confirmation Modal                              -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="deleteModalOverlay" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle" hidden>
+    <div class="modal modal--sm">
+      <div class="modal__header">
+        <h2 class="modal__title" id="deleteModalTitle">🗑️ Delete Employee</h2>
+        <button class="modal__close" id="deleteModalClose" aria-label="Close delete modal">✕</button>
+      </div>
+      <div class="modal__body">
+        <p id="deleteConfirmText">Are you sure you want to delete this employee? This action cannot be undone.</p>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--danger" id="confirmDeleteBtn">
+          <span class="btn__icon" aria-hidden="true">🗑️</span> Yes, Delete
+        </button>
+        <button class="btn btn--secondary" id="cancelDeleteBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
